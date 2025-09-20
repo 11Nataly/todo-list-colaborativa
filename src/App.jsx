@@ -7,7 +7,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import EditTaskModal from "./components/EditTaskModal.jsx";
-import LoginPage from "./LoginPage";
+import LoginPage from "./auth/LoginPage.jsx";
 import SearchInput from "./components/SearchInput.jsx";
 import { getTareas, getUsuarios } from "./utils/taskService.js";
 import {
