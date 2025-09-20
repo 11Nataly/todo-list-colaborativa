@@ -1,19 +1,13 @@
 // src/components/TaskList.jsx
-import React, { useEffect, useState } from "react";
-import { getTareas, getUsuarios } from "../utils/taskService.js";
+import React from "react";
 
-const TaskList = ({ query }) => {
-  const [tareas, setTareas] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
-
-  useEffect(() => {
-    setTareas(getTareas());
-    setUsuarios(getUsuarios());
-  }, []);
-
+const TaskList = ({ query, tareas, usuarios, onDelete }) => {
+  /*buscar usuario por titulo  douglas*/
   const tareasFiltradas = tareas.filter((t) =>
     t.titulo.toLowerCase().includes(query.toLowerCase())
+  
   );
+
 
   const getUsuarioNombre = (id) => {
     const user = usuarios.find((u) => u.id === id);
@@ -42,14 +36,33 @@ const TaskList = ({ query }) => {
                 {tarea.completada ? "Completada" : "Pendiente"}
               </span>
             </div>
+
             <p className="text-sm text-gray-600">
               Asignada a:{" "}
-              <span className="font-medium">{getUsuarioNombre(tarea.usuarioId)}</span>
+              <span className="font-medium">
+                {getUsuarioNombre(tarea.usuarioId)}
+              </span>
             </p>
+
             <p className="text-xs text-gray-500 mt-2">
-              Creada: {new Date(tarea.fechaCreacion).toLocaleString()} <br />
-              Editada: {new Date(tarea.fechaEdicion).toLocaleString()}
+              Creada:{" "}
+              {tarea.fechaCreacion
+                ? new Date(tarea.fechaCreacion).toLocaleString()
+                : "Sin fecha"}{" "}
+              <br />
+              Editada:{" "}
+              {tarea.fechaEdicion
+                ? new Date(tarea.fechaEdicion).toLocaleString()
+                : "Sin edición"}
             </p>
+
+            {/*Botón eliminar */}
+            <button
+              onClick={() => onDelete(tarea.id)}
+              className="mt-3 px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            >
+              Eliminar
+            </button>
           </li>
         ))
       ) : (
