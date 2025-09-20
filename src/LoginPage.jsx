@@ -29,7 +29,7 @@ const res = await fetch("http://localhost:3001/usuarios");
 
       // guardar en localStorage
       localStorage.setItem("user", JSON.stringify(user));
-      setSuccess("✅ Ingreso correcto. Redirigiendo...");
+      setSuccess("Ingreso correcto. Redirigiendo...");
 
       setTimeout(() => {
         if (user.rol === "admin") {
