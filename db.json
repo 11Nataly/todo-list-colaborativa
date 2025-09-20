@@ -1,0 +1,70 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nombre": "Luis",
+      "email": "luis@example.com",
+      "password": "pass1",
+      "rol": "admin"
+    },
+    {
+      "id": 2,
+      "nombre": "Clara",
+      "email": "clara@example.com",
+      "password": "pass2",
+      "rol": "user"
+    }
+  ],
+  "tareas": [
+    {
+      "id": 101,
+      "titulo": "Comprar víveres",
+      "descripcion": "",
+      "usuarioId": 1,
+      "completada": false,
+      "fechaCreacion": "2025-09-10T09:00:00Z",
+      "fechaEdicion": "2025-09-10T12:00:00Z",
+      "editadoPor": null
+    },
+    {
+      "id": 102,
+      "titulo": "Enviar correo al cliente",
+      "descripcion": "",
+      "usuarioId": 2,
+      "completada": false,
+      "fechaCreacion": "2025-09-11T10:30:00Z",
+      "fechaEdicion": "2025-09-11T11:15:00Z",
+      "editadoPor": null
+    },
+    {
+      "id": 103,
+      "titulo": "Actualizar página web",
+      "descripcion": "",
+      "usuarioId": 1,
+      "completada": false,
+      "fechaCreacion": "2025-09-12T14:00:00Z",
+      "fechaEdicion": "2025-09-13T09:00:00Z",
+      "editadoPor": null
+    },
+    {
+      "id": 104,
+      "titulo": "Revisar facturas",
+      "descripcion": "",
+      "usuarioId": 2,
+      "completada": false,
+      "fechaCreacion": "2025-09-13T08:00:00Z",
+      "fechaEdicion": "2025-09-13T10:30:00Z",
+      "editadoPor": null
+    },
+    {
+      "id": 105,
+      "titulo": "Planificar reunión",
+      "descripcion": "",
+      "usuarioId": 1,
+      "completada": false,
+      "fechaCreacion": "2025-09-14T15:00:00Z",
+      "fechaEdicion": "2025-09-14T16:00:00Z",
+      "editadoPor": null
+    }
+  ]
+}
