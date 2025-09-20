@@ -4,7 +4,9 @@ import React from "react";
 const TaskList = ({ query, tareas, usuarios, onDelete }) => {
   /*buscar usuario por titulo  douglas*/
   const tareasFiltradas = tareas.filter((t) =>
-    t.titulo.toLowerCase().includes(query.toLowerCase())
+    (t.titulo.toLowerCase().includes(query.toLowerCase()))||
+    (t.editadoPor && t.editadoPor.toLowerCase().includes(query.toLowerCase()))||
+    (t.descripcion && t.descripcion.toLowerCase().includes(query.toLowerCase()))
   
   );
 
