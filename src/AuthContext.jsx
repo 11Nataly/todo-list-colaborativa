@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await fetch(
-        `http://localhost:3001/usuarios?email=${email}&password=${password}`
+        `http://localhost:3000/usuarios?email=${email}&password=${password}`
       );
       const data = await res.json();
 
