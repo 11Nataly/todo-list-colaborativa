@@ -9,7 +9,6 @@ import {
 import EditTaskModal from "./components/EditTaskModal.jsx";
 import LoginPage from "./LoginPage";
 import SearchInput from "./components/SearchInput.jsx";
-import TaskList from "./components/TaskList.jsx";
 import { getTareas, getUsuarios } from "./utils/taskService.js";
 import {
   actualizarTarea,
