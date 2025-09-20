@@ -9,7 +9,6 @@ import {
 import LoginPage from "./LoginPage";
 import TaskList from "./components/TaskList.jsx";
 import SearchInput from "./components/SearchInput.jsx";
-import TaskList from "./components/TaskList.jsx";
 import { getTareas, getUsuarios } from "./utils/taskService.js";
 
 // Componente de Lista de Tareas (tu funcionalidad original)
