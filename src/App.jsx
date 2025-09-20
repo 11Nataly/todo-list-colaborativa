@@ -14,7 +14,7 @@ import { getTareas, getUsuarios } from "./utils/taskService.js";
 import {
   actualizarTarea,
   cargarDB,
-} from "./utils/taskService";
+} from "./utils/service.js";
 
 
 
