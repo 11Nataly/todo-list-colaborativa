@@ -1,7 +1,5 @@
-
-
 import React, { useEffect, useState } from "react";
-import { getTareas } from "../services/taskService";
+import { getTareas } from "../utils/service";
 
 const TaskList = () => {
   const [tareas, setTareas] = useState([]);
