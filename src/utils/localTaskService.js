@@ -219,10 +219,29 @@ export function eliminarTarea(id) {
 }
 
 /**
- * marcarCompletada(id, completada, editorId) -> tarea actualizada | null
+ * toggleCompletada(id, editorId) -> tarea actualizada | null
+ * Alterna el estado 'completada' de una tarea y actualiza la fecha de edición.
  */
+export function toggleCompletada(id, editorId = null) {
+  const tarea = getTareaPorId(id); // Reusa la función para obtener la tarea
+  
+  if (!tarea) {
+    return null;
+  }
+  
+  // Calcular el nuevo estado: invertimos el valor actual
+  const nuevoEstado = !tarea.completada;
+  
+  // Usar la función existente actualizarTarea para aplicar el patch y guardar
+  const patch = { completada: nuevoEstado };
+  return actualizarTarea(id, patch, editorId); 
+}
+
+/**
+ * marcarCompletada(id, completada, editorId) -> tarea actualizada | null
+ */
 export function marcarCompletada(id, completada = true, editorId = null) {
-  return actualizarTarea(id, { completada: Boolean(completada) }, editorId);
+  return actualizarTarea(id, { completada: Boolean(completada) }, editorId);
 }
 
 /**
@@ -240,6 +259,7 @@ const localTaskService = {
   crearTarea,
   actualizarTarea,
   eliminarTarea,
+  toggleCompletada,
   marcarCompletada,
   resetDB,
 };

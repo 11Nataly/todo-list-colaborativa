@@ -16,11 +16,6 @@ import localTaskService from "./utils/localTaskService"; // wrapper que iniciali
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-/**
- * Nota:
- * - No toco LoginPage ni la lógica de rutas/PrivateRoute que tenías.
- * - Este App.jsx inicializa localTaskService (si es necesario) y carga tareas/usuarios desde ahí.
- */
 
 function TaskListPage() {
   const [query, setQuery] = useState("");
@@ -84,6 +79,41 @@ function TaskListPage() {
     }
   };
 
+  // --- NUEVO: Manejo de alternar estado (Completada/Pendiente) con Toastify ---
+  const handleToggle = (id) => {
+    try {
+      // Asumimos que localTaskService tiene una función que alterna el estado y devuelve la tarea actualizada
+      const tareaActualizada = localTaskService.toggleCompletada(id); 
+      
+      if (tareaActualizada) {
+        // Actualizamos estado local inmediatamente usando la tarea devuelta
+        setTareas((prev) => prev.map((t) => (String(t.id) === String(id) ? tareaActualizada : t)));
+        
+        // Uso de Toastify para mensaje de confirmación
+        toast.info(
+          tareaActualizada.completada 
+            ? `🎉 Tarea "${tareaActualizada.titulo}" marcada como ¡Completada!` 
+            : `✏️ Tarea "${tareaActualizada.titulo}" marcada como pendiente.`
+        );
+      } else {
+        toast.error("No se pudo actualizar el estado de la tarea (ID no encontrado)");
+      }
+    } catch (err) {
+      console.error("Error alternando estado:", err);
+      toast.error("Error alternando el estado de la tarea");
+    }
+  };
+
+
+
+  // --- STUB: Función para la edición (requerida por TaskCard/TaskList, pero funcionalidad no implementada aún)
+  const handleEdit = (tarea) => {
+    // Si decides implementar la edición más tarde, aquí abrirías el modal: setTareaAEditar(tarea);
+    console.log("Tarea seleccionada para editar:", tarea);
+  };
+  // ------------------------------------
+
+
   // Búsqueda reactiva (pequeño debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -109,6 +139,8 @@ function TaskListPage() {
         tareas={tareas}
         usuarios={usuarios}
         onDelete={handleDelete} // mantiene la API que tu TaskList espera
+        onToggle={handleToggle} 
+        onEdit={handleEdit} 
       />
 
       <ToastContainer position="top-right" autoClose={2000} />

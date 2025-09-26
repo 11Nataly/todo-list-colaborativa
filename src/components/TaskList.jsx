@@ -2,7 +2,7 @@
 import React from "react";
 import TaskCard from "./TaskCard";
 
-const TaskList = ({ query, tareas, usuarios, onDelete }) => {
+const TaskList = ({ query, tareas, usuarios, onDelete, onToggle, onEdit }) => {
   // Filtrar tareas por búsqueda 
   const tareasFiltradas = tareas.filter((t) =>
     (t.titulo.toLowerCase().includes(query.toLowerCase())) ||
@@ -24,6 +24,8 @@ const TaskList = ({ query, tareas, usuarios, onDelete }) => {
             tarea={tarea}
             usuario={getUsuarioNombre(tarea.usuarioId)}
             onDelete={onDelete}
+            onToggle={onToggle}
+            onEdit={onEdit}
           />
         ))
       ) : (
