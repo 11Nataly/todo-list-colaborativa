@@ -15,7 +15,7 @@ const LoginPage = () => {
     setSuccess("");
 
     try {
-const res = await fetch("http://localhost:3001/usuarios");
+const res = await fetch("http://localhost:3000/usuarios");
       const users = await res.json();
 
       const user = users.find(
