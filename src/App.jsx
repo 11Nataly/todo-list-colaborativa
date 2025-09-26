@@ -105,13 +105,33 @@ function TaskListPage() {
   };
 
 
+// 👇️ INICIO - Lógica de Edición del compañero Jhosep 🆕
+  // Esta función es llamada por TaskList/guardarEdicion, 
+  // pasando el ID y el objeto con los datos a actualizar ({ titulo, usuarioId }).
+  const handleEdit = (id, datosActualizados) => { 
+    try {
+      // 1. Persistir el cambio en localTaskService
+      const tareaActualizada = localTaskService.actualizarTarea(id, datosActualizados);
 
-  // --- STUB: Función para la edición (requerida por TaskCard/TaskList, pero funcionalidad no implementada aún)
-  const handleEdit = (tarea) => {
-    // Si decides implementar la edición más tarde, aquí abrirías el modal: setTareaAEditar(tarea);
-    console.log("Tarea seleccionada para editar:", tarea);
-  };
-  // ------------------------------------
+      if (tareaActualizada) {
+        // 2. Actualizar el estado de React con la nueva versión de la tarea
+        setTareas((prev) =>
+          prev.map((t) =>
+            String(t.id) === String(id)
+              ? tareaActualizada // Reemplaza la tarea antigua con la actualizada
+              : t
+          )
+        );
+        toast.info(`📝 Tarea "${tareaActualizada.titulo}" guardada.`); // Notificación
+      } else {
+        toast.error("No se pudo guardar la edición de la tarea (ID no encontrado).");
+      }
+    } catch (err) {
+      console.error("Error guardando edición:", err);
+      toast.error("Error guardando la edición de la tarea.");
+    }
+  };
+  // 👆️ FIN - Lógica de Edición del compañero (REEMPLAZA STUB - Líneas 114-137) 🆕
 
 
   // Búsqueda reactiva (pequeño debounce)
@@ -139,7 +159,7 @@ function TaskListPage() {
         tareas={tareas}
         usuarios={usuarios}
         onDelete={handleDelete} // mantiene la API que tu TaskList espera
-        onToggle={handleToggle} 
+        onToggle={handleToggle} // <-- CONECTADO: Ahora maneja el toggle con Toastify
         onEdit={handleEdit} 
       />
 
