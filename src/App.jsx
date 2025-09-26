@@ -55,7 +55,7 @@ function PrivateRoute({ children, allowedRoles }) {
     return <Navigate to="/login" />;
   }
   if (!allowedRoles.includes(user.rol)) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/tasks" />;
   }
   return children;
 }
