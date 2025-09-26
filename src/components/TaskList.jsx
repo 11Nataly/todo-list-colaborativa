@@ -3,7 +3,7 @@ import React from "react";
 import TaskCard from "./TaskCard";
 
 const TaskList = ({ query, tareas, usuarios, onDelete }) => {
-  // Filtrar tareas por búsqueda
+  // Filtrar tareas por búsqueda 
   const tareasFiltradas = tareas.filter((t) =>
     (t.titulo.toLowerCase().includes(query.toLowerCase())) ||
     (t.editadoPor && t.editadoPor.toLowerCase().includes(query.toLowerCase())) ||
