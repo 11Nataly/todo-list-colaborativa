@@ -114,15 +114,17 @@ export function getTareas(filters = {}) {
     items = items.filter((t) => Boolean(t.completada) === Boolean(completada));
   }
 
-  // búsqueda (titulo y descripcion)
+  // búsqueda (titulo y descripcion) Douglas
   if (q && String(q).trim().length > 0) {
     const qLower = String(q).trim().toLowerCase();
     items = items.filter((t) =>
+      (t.editadoPor && String(t.editadoPor).toLowerCase().includes(qLower)) ||
       (t.titulo && String(t.titulo).toLowerCase().includes(qLower)) ||
       (t.descripcion && String(t.descripcion).toLowerCase().includes(qLower))
     );
   }
 
+  
   // rango de fechas (basado en fechaCreacion)
   if (fechaDesde) {
     const fromTs = new Date(fechaDesde).getTime();
