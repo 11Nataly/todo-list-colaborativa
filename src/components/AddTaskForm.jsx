@@ -1,12 +1,22 @@
 // src/components/AddTaskForm.jsx
-import React, { useState } from "react";
-import taskService from "../utils/taskService"; // tu service (crearTarea etc.)
+import React, { useEffect, useState } from "react";
+import localTaskService from "../utils/localTaskService";
 import { toast } from "react-toastify";
 
 export default function AddTaskForm({ usuarios = [], onCreated }) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [usuarioId, setUsuarioId] = useState(usuarios.length ? usuarios[0].id : "");
+  const [usuarioId, setUsuarioId] = useState("");
+
+  useEffect(() => {
+    // inicializa wrapper si hace falta
+    localTaskService.initIfNeeded();
+    // setear usuario por defecto si existen usuarios
+    if (usuarios && usuarios.length > 0 && !usuarioId) {
+      setUsuarioId(String(usuarios[0].id));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuarios]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -19,18 +29,21 @@ export default function AddTaskForm({ usuarios = [], onCreated }) {
       return;
     }
 
-    // crear la tarea en el service (persistencia)
-    const nueva = taskService.crearTarea({
-      titulo: titulo.trim(),
-      descripcion: descripcion.trim(),
-      usuarioId: Number(usuarioId),
-    });
+    try {
+      const nueva = localTaskService.crearTarea({
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim(),
+        usuarioId: Number(usuarioId),
+      });
 
-    // notificar y pasar al padre
-    toast.success("✅ Tarea creada correctamente");
-    setTitulo("");
-    setDescripcion("");
-    if (onCreated) onCreated(nueva);
+      toast.success("✅ Tarea creada correctamente");
+      setTitulo("");
+      setDescripcion("");
+      if (onCreated) onCreated(nueva);
+    } catch (err) {
+      console.error("Error creando tarea:", err);
+      toast.error("No se pudo crear la tarea");
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-// src/App.jsx - VERSIÓN FUSIONADA
+// src/App.jsx
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
@@ -6,41 +6,117 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
 import LoginPage from "./LoginPage";
 import TaskList from "./components/TaskList.jsx";
 import SearchInput from "./components/SearchInput.jsx";
-import { getTareas, getUsuarios } from "./utils/taskService.js";
+import AddTaskForm from "./components/AddTaskForm.jsx"; // formulario que crea tareas (usa localTaskService)
+import localTaskService from "./utils/localTaskService"; // wrapper que inicializa desde db.json y usa localStorage
 
-// Componente de Lista de Tareas (tu funcionalidad original)
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+/**
+ * Nota:
+ * - No toco LoginPage ni la lógica de rutas/PrivateRoute que tenías.
+ * - Este App.jsx inicializa localTaskService (si es necesario) y carga tareas/usuarios desde ahí.
+ */
+
 function TaskListPage() {
   const [query, setQuery] = useState("");
   const [tareas, setTareas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
 
+  // Cargar/recargar tareas desde localTaskService (extrae .tareas del resultado)
+  const reloadTareas = (q = "") => {
+    try {
+      const res = localTaskService.getTareas({ q });
+      const items = res && Array.isArray(res.tareas) ? res.tareas : [];
+      setTareas(items);
+    } catch (err) {
+      console.error("Error cargando tareas:", err);
+      setTareas([]);
+    }
+  };
+
+  const reloadUsuarios = () => {
+    try {
+      const u = localTaskService.getUsuarios();
+      setUsuarios(Array.isArray(u) ? u : []);
+    } catch (err) {
+      console.error("Error cargando usuarios:", err);
+      setUsuarios([]);
+    }
+  };
+
+  // inicializar wrapper y datos al montar
   useEffect(() => {
-    setTareas(getTareas());
-    setUsuarios(getUsuarios());
+    try {
+      localTaskService.initIfNeeded();
+    } catch (err) {
+      console.warn("initIfNeeded error (puede ser ignorable):", err);
+    }
+    reloadUsuarios();
+    reloadTareas();
   }, []);
 
-  // 👉 función para eliminar
-  const handleDelete = (id) => {
-    setTareas((prev) => prev.filter((t) => t.id !== id));
+  // Manejo de creación (AddTaskForm llamará onCreated)
+  const handleCreated = (nueva) => {
+    // Nueva ya fue guardada en localTaskService por AddTaskForm; recargamos la lista
+    reloadTareas(query);
+    toast.success("✅ Tarea creada");
   };
+
+  // Manejo de eliminar (llamado por TaskList -> TaskCard via onDelete)
+  const handleDelete = (id) => {
+    try {
+      const ok = localTaskService.eliminarTarea(id);
+      if (ok) {
+        // Actualizamos estado local inmediatamente
+        setTareas((prev) => prev.filter((t) => String(t.id) !== String(id)));
+        toast.success("🗑️ Se eliminó la tarea correctamente");
+      } else {
+        toast.error("No se pudo eliminar la tarea (id no encontrado)");
+      }
+    } catch (err) {
+      console.error("Error eliminando tarea:", err);
+      toast.error("Error eliminando la tarea");
+    }
+  };
+
+  // Búsqueda reactiva (pequeño debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      reloadTareas(query);
+    }, 250);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   return (
     <div className="max-w-3xl mx-auto p-5">
+      <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
+
+      {/* Formulario para crear tareas (usa localTaskService internamente) */}
+      <AddTaskForm usuarios={usuarios} onCreated={handleCreated} />
+
+      {/* Buscador */}
       <SearchInput query={query} setQuery={setQuery} />
+
+      {/* Lista (tu TaskList actual) */}
       <TaskList
         query={query}
         tareas={tareas}
         usuarios={usuarios}
-        onDelete={handleDelete}
+        onDelete={handleDelete} // mantiene la API que tu TaskList espera
       />
+
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }
 
-// Ruta privada (de tu compañero)
+// PrivateRoute dejamos igual que antes (no tocamos login ni su lógica)
 function PrivateRoute({ children, allowedRoles }) {
   const [user, setUser] = useState(null);
 
@@ -60,9 +136,9 @@ function PrivateRoute({ children, allowedRoles }) {
   return children;
 }
 
-// Páginas
+// Páginas (sin cambios)
 const AdminPage = () => <h2>Panel de Admin</h2>;
-const UserPage = () => <TaskListPage />; // ¡AQUÍ INTEGRAMOS TU LISTA DE TAREAS!
+const UserPage = () => <TaskListPage />; // integrando tu TaskListPage
 
 function App() {
   return (
