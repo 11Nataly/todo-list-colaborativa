@@ -15,7 +15,7 @@ const LoginPage = () => {
     setSuccess("");
 
     try {
-const res = await fetch("http://localhost:3000/usuarios");
+      const res = await fetch("http://localhost:3000/usuarios");
       const users = await res.json();
 
       const user = users.find(
@@ -27,7 +27,6 @@ const res = await fetch("http://localhost:3000/usuarios");
         return;
       }
 
-      // guardar en localStorage
       localStorage.setItem("user", JSON.stringify(user));
       setSuccess("Ingreso correcto. Redirigiendo...");
 
@@ -44,32 +43,72 @@ const res = await fetch("http://localhost:3000/usuarios");
   };
 
   return (
-    <div style={{ background: "#f0f4f8", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <div style={{ background: "white", padding: "2rem", borderRadius: "12px", width: "300px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)" }}>
+    <div
+      style={{
+        background: "#f0f4f8",
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "12px",
+          width: "300px",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        }}
+      >
         <h2 style={{ color: "#1e3a8a", textAlign: "center" }}>Login</h2>
         {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
-        {success && <p style={{ color: "green", textAlign: "center" }}>{success}</p>}
+        {success && (
+          <p style={{ color: "green", textAlign: "center" }}>{success}</p>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "1rem" }}>
-            <label>Email:</label>
+            <label htmlFor="email">Email:</label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
             />
           </div>
           <div style={{ marginBottom: "1rem" }}>
-            <label>Contraseña:</label>
+            <label htmlFor="password">Contraseña:</label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
             />
           </div>
-          <button type="submit" style={{ width: "100%", padding: "0.7rem", background: "#1e40af", color: "white", border: "none", borderRadius: "8px" }}>
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "0.7rem",
+              background: "#1e40af",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+            }}
+          >
             Iniciar sesión
           </button>
         </form>

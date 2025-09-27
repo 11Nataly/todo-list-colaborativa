@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import TaskCard from "./TaskCard.jsx"; // Usamos el TaskCard con motion.li
 
-// Añadimos 'onToggle' a los props para alternar el estado
-const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
+// Ahora todos los props tienen valores por defecto
+const TaskList = ({
+  query = "",
+  tareas = [],
+  usuarios = [],
+  onDelete = () => {},
+  onEdit = () => {},
+  onToggle = () => {},
+}) => {
   const [editandoId, setEditandoId] = useState(null);
   const [editTitulo, setEditTitulo] = useState("");
   const [editUsuario, setEditUsuario] = useState("");
@@ -18,35 +25,28 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
     const user = usuarios.find((u) => u.id === id);
     return user ? user.nombre : "Desconocido";
   };
-  
-  // Esta función se pasa a TaskCard como prop 'onEdit' para iniciar el modo edición.
+
   const startEditMode = (tarea) => {
     setEditandoId(tarea.id);
     setEditTitulo(tarea.titulo);
-    // Aseguramos que editUsuario sea el ID o una cadena vacía si no está asignado.
     setEditUsuario(tarea.usuarioId || "");
   };
 
-  // Función de edición (Lógica original de tu compañero) que llama al onEdit del padre para GUARDAR
   const guardarEdicion = (id) => {
     if (editTitulo.trim() === "") return;
-    // onEdit del padre maneja la actualización del estado y la persistencia
     onEdit(id, {
       titulo: editTitulo,
       usuarioId: editUsuario ? Number(editUsuario) : null,
-      // La fechaEdicion se gestionará en App.jsx/localTaskService
     });
     setEditandoId(null);
   };
 
   return (
-    // Ya no usamos <ul>, ya que TaskCard usa <motion.li>
     <div className="space-y-4">
       {tareasFiltradas.length > 0 ? (
         tareasFiltradas.map((tarea) => (
           <React.Fragment key={tarea.id}>
             {editandoId === tarea.id ? (
-              // --- Modo Edición (Inputs y botones) ---
               <div
                 key={`edit-${tarea.id}`}
                 className="p-4 bg-gray-50 rounded-lg shadow-inner border-l-4 border-yellow-500"
@@ -88,13 +88,12 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
                 </div>
               </div>
             ) : (
-              // --- Modo Visualización (Usando TaskCard) ---
               <TaskCard
                 tarea={tarea}
-                usuario={getUsuarioNombre(tarea.usuarioId)} // TaskCard espera 'usuario'
+                usuario={getUsuarioNombre(tarea.usuarioId)}
                 onDelete={onDelete}
-                onToggle={onToggle} 
-                onEdit={startEditMode} // onEdit de TaskCard ahora inicia el modo de edición
+                onToggle={onToggle}
+                onEdit={startEditMode}
               />
             )}
           </React.Fragment>
