@@ -143,30 +143,30 @@ function TaskListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
-  return (
-    <div className="max-w-3xl mx-auto p-5">
-      <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
+    return (
+      <div className="max-w-3xl mx-auto p-5">
+        <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
 
-      {/* Formulario para crear tareas (usa localTaskService internamente) */}
-      <AddTaskForm usuarios={usuarios} onCreated={handleCreated} />
+        {/* Formulario para crear tareas (usa localTaskService internamente) */}
+        <AddTaskForm onCreated={handleCreated} />
 
-      {/* Buscador */}
-      <SearchInput query={query} setQuery={setQuery} />
+        {/* Buscador */}
+        <SearchInput query={query} setQuery={setQuery} />
 
-      {/* Lista (tu TaskList actual) */}
-      <TaskList
-        query={query}
-        tareas={tareas}
-        usuarios={usuarios}
-        onDelete={handleDelete} // mantiene la API que tu TaskList espera
-        onToggle={handleToggle} // <-- CONECTADO: Ahora maneja el toggle con Toastify
-        onEdit={handleEdit} 
-      />
+        {/* Lista (tu TaskList actual) */}
+        <TaskList
+          query={query}
+          tareas={tareas}
+          usuarios={usuarios}
+          onDelete={handleDelete} // mantiene la API que tu TaskList espera
+          onToggle={handleToggle} // <-- CONECTADO: Ahora maneja el toggle con Toastify
+          onEdit={handleEdit} 
+        />
 
-      <ToastContainer position="top-right" autoClose={2000} />
-    </div>
-  );
-}
+        <ToastContainer position="top-right" autoClose={2000} />
+      </div>
+    );
+  }
 
 
 // PrivateRoute dejamos igual que antes (no tocamos login ni su lógica)
