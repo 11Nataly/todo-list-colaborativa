@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import LoginPage from "./LoginPage";
-import TaskList from "./components/TaskList.jsx";
+import TaskList from "./pages/TaskList.jsx";
 import SearchInput from "./components/SearchInput.jsx";
 import TaskModal from "./components/TaskModal.jsx"; // NUEVO: Componente Modal para crear tareas
 import localTaskService from "./utils/localTaskService"; // wrapper que inicializa desde db.json y usa localStorage
