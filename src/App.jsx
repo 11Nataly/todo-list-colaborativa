@@ -168,6 +168,7 @@ function TaskListPage() {
   );
 }
 
+
 // PrivateRoute dejamos igual que antes (no tocamos login ni su lógica)
 function PrivateRoute({ children, allowedRoles }) {
   const [user, setUser] = useState(null);
