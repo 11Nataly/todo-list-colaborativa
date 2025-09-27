@@ -8,10 +8,18 @@ export default function AddTaskForm({ onCreated, isModal = false }) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
-  // ... (getLoggedUserId y handleSubmit son iguales, no las repito) ...
-  const getLoggedUserId = () => {
-    // ... (misma lógica) ...
-  };
+ const getLoggedUserId = () => {
+  try {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return null;
+
+    const user = JSON.parse(storedUser);
+    return user?.id || null; // usamos id del usuario logueado
+  } catch (err) {
+    console.error("Error obteniendo usuario logueado:", err);
+    return null;
+  }
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
