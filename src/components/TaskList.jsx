@@ -1,28 +1,49 @@
-// src/components/TaskList.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TaskCard from "./TaskCard.jsx"; // Usamos el TaskCard con motion.li
 
-// Añadimos 'onToggle' a los props para alternar el estado
-const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
+const TaskList = ({
+  query = "",
+  tareas = [],
+  usuarios = [],
+  onDelete,
+  onEdit,
+  onToggle,
+  onLogout, // 👈 añadimos prop para logout
+}) => {
   const [editandoId, setEditandoId] = useState(null);
   const [editTitulo, setEditTitulo] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
 
+  const tareasPorPagina = 5;
+
+  // Filtrar tareas
   const tareasFiltradas = tareas.filter(
     (t) =>
-      t.titulo.toLowerCase().includes(query.toLowerCase()) ||
+      t.titulo?.toLowerCase().includes(query.toLowerCase()) ||
       (t.editadoPor &&
         t.editadoPor.toLowerCase().includes(query.toLowerCase()))
   );
+
+  // Total de páginas
+  const totalPaginas = Math.ceil(tareasFiltradas.length / tareasPorPagina);
+
+  // Cortar tareas para la página actual
+  const inicio = (paginaActual - 1) * tareasPorPagina;
+  const tareasMostradas = tareasFiltradas.slice(inicio, inicio + tareasPorPagina);
+
+  // Resetear a la página 1 cuando cambie la búsqueda
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [query]);
 
   const getUsuarioNombre = (id) => {
     const user = usuarios.find((u) => u.id === id);
     return user ? user.nombre : "Desconocido";
   };
-  
-  // Esta función se pasa a TaskCard como prop 'onEdit' para iniciar el modo edición.
+
   const startEditMode = (tarea) => {
     setEditandoId(tarea.id);
-    setEditTitulo(tarea.titulo);
+    setEditTitulo(tarea.titulo || "");
     // Aseguramos que editUsuario sea el ID o una cadena vacía si no está asignado.
     setEditUsuario(tarea.usuarioId || "");
   };
@@ -49,9 +70,23 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
     };
 
   return (
-        // Ya no usamos <ul>, ya que TaskCard usa <motion.li>
-        <div className="space-y-4">
-            {tareasFiltradas.length > 0 ? (
+    // Ya no usamos <ul>, ya que TaskCard usa <motion.li>
+    <div className="space-y-4">
+      {/* 🔴 Botón de logout arriba */}
+      <div className="flex justify-end">
+        <button
+          onClick={onLogout}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+      </div>
+
+
+
+
+
+              {tareasFiltradas.length > 0 ? (
                 tareasFiltradas.map((tarea) => (
                     <React.Fragment key={tarea.id}>
                         {editandoId === tarea.id ? (
@@ -108,8 +143,32 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
                     No hay tareas disponibles
                 </div>
             )}
+{/* Botones de paginación */}
+      {totalPaginas > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <button
+            onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+            disabled={paginaActual === 1}
+            className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <span>
+            Página {paginaActual} de {totalPaginas}
+          </span>
+          <button
+            onClick={() =>
+              setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
+            }
+            disabled={paginaActual === totalPaginas}
+            className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Siguiente
+          </button>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default TaskList;
