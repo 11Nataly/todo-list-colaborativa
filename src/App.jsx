@@ -10,7 +10,7 @@ import {
 import LoginPage from "./LoginPage";
 import TaskList from "./components/TaskList.jsx";
 import SearchInput from "./components/SearchInput.jsx";
-import AddTaskForm from "./components/AddTaskForm.jsx"; // formulario que crea tareas (usa localTaskService)
+import TaskModal from "./components/TaskModal.jsx"; // NUEVO: Componente Modal para crear tareas
 import localTaskService from "./utils/localTaskService"; // wrapper que inicializa desde db.json y usa localStorage
 
 import { ToastContainer, toast } from "react-toastify";
@@ -21,6 +21,9 @@ function TaskListPage() {
   const [query, setQuery] = useState("");
   const [tareas, setTareas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  
+  // 💡 NUEVO ESTADO: Controla la visibilidad del modal
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   // Cargar/recargar tareas desde localTaskService (extrae .tareas del resultado)
   const reloadTareas = (q = "") => {
@@ -44,6 +47,8 @@ function TaskListPage() {
     }
   };
 
+  
+
   // inicializar wrapper y datos al montar
   useEffect(() => {
     try {
@@ -55,11 +60,16 @@ function TaskListPage() {
     reloadTareas();
   }, []);
 
+  //--------------
+  //MANEJOS
+  //--------------
+
   // Manejo de creación (AddTaskForm llamará onCreated)
   const handleCreated = (nueva) => {
     // Nueva ya fue guardada en localTaskService por AddTaskForm; recargamos la lista
     reloadTareas(query);
     toast.success("✅ Tarea creada");
+    // 💡 Ya no es necesario cerrar el modal aquí, TaskModal lo hace.
   };
 
   // Manejo de eliminar (llamado por TaskList -> TaskCard via onDelete)
@@ -105,20 +115,35 @@ function TaskListPage() {
   };
 
 
-// 👇️ INICIO - Lógica de Edición del compañero Jhosep 🆕
-  // Esta función es llamada por TaskList/guardarEdicion, 
-  // pasando el ID y el objeto con los datos a actualizar ({ titulo, usuarioId }).
+// 👇️ Lógica de Edición MODIFICADA 🆕
+  // Ahora recibe {titulo, editorId} y NO usuarioId (asignado)
   const handleEdit = (id, datosActualizados) => { 
+    
+    // Validar que el editorId llegó de TaskList.jsx
+    if (!datosActualizados.editorId) {
+        toast.error("No se pudo guardar la edición: Autor no identificado.");
+        return;
+    }
+
     try {
-      // 1. Persistir el cambio en localTaskService
-      const tareaActualizada = localTaskService.actualizarTarea(id, datosActualizados);
+      // 1. Preparamos los datos para persistir: 
+      const datosFinales = {
+        titulo: datosActualizados.titulo,
+        fechaEdicion: new Date().toISOString(), // Añadir timestamp de edición
+        ultimaEdicionPorId: datosActualizados.editorId // Guardamos el ID del editor logueado
+        // Importante: Al no pasar 'usuarioId' aquí, confiamos en que 
+        // localTaskService.actualizarTarea PRESERVE la asignación previa.
+      };
+
+      // 2. Persistir el cambio en localTaskService
+      const tareaActualizada = localTaskService.actualizarTarea(id, datosFinales);
 
       if (tareaActualizada) {
-        // 2. Actualizar el estado de React con la nueva versión de la tarea
+        // 3. Actualizar el estado de React
         setTareas((prev) =>
           prev.map((t) =>
             String(t.id) === String(id)
-              ? tareaActualizada // Reemplaza la tarea antigua con la actualizada
+              ? tareaActualizada 
               : t
           )
         );
@@ -131,7 +156,7 @@ function TaskListPage() {
       toast.error("Error guardando la edición de la tarea.");
     }
   };
-  // 👆️ FIN - Lógica de Edición del compañero (REEMPLAZA STUB - Líneas 114-137) 🆕
+// 👆️ FIN - Lógica de Edición MODIFICADA
 
 
   // Búsqueda reactiva (pequeño debounce)
@@ -143,12 +168,27 @@ function TaskListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
+
+  //--------
+  // RETURN
+  //-------
+
+
     return (
       <div className="max-w-3xl mx-auto p-5">
         <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
 
         {/* Formulario para crear tareas (usa localTaskService internamente) */}
-        <AddTaskForm onCreated={handleCreated} />
+
+      {/* 💡 EL BOTÓN QUE ABRE EL MODAL */}
+      <div className="mb-6 flex justify-end">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
+        >
+          + Crear Tarea
+        </button>
+      </div>
 
         {/* Buscador */}
         <SearchInput query={query} setQuery={setQuery} />
@@ -164,6 +204,13 @@ function TaskListPage() {
         />
 
         <ToastContainer position="top-right" autoClose={2000} />
+
+        {/* 💡 EL COMPONENTE MODAL */}
+      <TaskModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)} // Función para cerrar el modal
+        onTaskCreated={handleCreated} // La función original para recargar la lista
+      />
       </div>
     );
   }
