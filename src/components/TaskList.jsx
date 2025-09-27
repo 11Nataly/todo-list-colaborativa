@@ -8,6 +8,7 @@ const TaskList = ({
   onDelete,
   onEdit,
   onToggle,
+  onLogout, // 👈 añadimos prop para logout
 }) => {
   const [editandoId, setEditandoId] = useState(null);
   const [editTitulo, setEditTitulo] = useState("");
@@ -58,6 +59,16 @@ const TaskList = ({
 
   return (
     <div className="space-y-4">
+      {/* 🔴 Botón de logout arriba */}
+      <div className="flex justify-end">
+        <button
+          onClick={onLogout}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+      </div>
+
       {tareasMostradas.length > 0 ? (
         tareasMostradas.map((tarea) => (
           <React.Fragment key={tarea.id}>

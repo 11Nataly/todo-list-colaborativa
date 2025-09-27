@@ -10,8 +10,8 @@ import {
 import LoginPage from "./LoginPage";
 import TaskList from "./components/TaskList.jsx";
 import SearchInput from "./components/SearchInput.jsx";
-import AddTaskForm from "./components/AddTaskForm.jsx"; // formulario que crea tareas (usa localTaskService)
-import localTaskService from "./utils/localTaskService"; // wrapper que inicializa desde db.json y usa localStorage
+import AddTaskForm from "./components/AddTaskForm.jsx";
+import localTaskService from "./utils/localTaskService";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,7 +22,13 @@ function TaskListPage() {
   const [tareas, setTareas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
 
-  // Cargar/recargar tareas desde localTaskService (extrae .tareas del resultado)
+  // 👉 Logout
+  const handleLogout = () => {
+    localStorage.removeItem("user"); // borra la sesión
+    window.location.href = "/login"; // redirige al login
+  };
+
+  // Cargar/recargar tareas desde localTaskService
   const reloadTareas = (q = "") => {
     try {
       const res = localTaskService.getTareas({ q });
@@ -44,33 +50,29 @@ function TaskListPage() {
     }
   };
 
-  // inicializar wrapper y datos al montar
   useEffect(() => {
     try {
       localTaskService.initIfNeeded();
     } catch (err) {
-      console.warn("initIfNeeded error (puede ser ignorable):", err);
+      console.warn("initIfNeeded error:", err);
     }
     reloadUsuarios();
     reloadTareas();
   }, []);
 
-  // Manejo de creación (AddTaskForm llamará onCreated)
-const handleCreated = (nueva) => {
-  setTareas((prev) => [...prev, nueva]); // 👉 añade la nueva tarea al estado
-  toast.success("✅ Tarea creada");
-};
+  const handleCreated = (nueva) => {
+    setTareas((prev) => [...prev, nueva]);
+    toast.success("✅ Tarea creada");
+  };
 
-  // Manejo de eliminar (llamado por TaskList -> TaskCard via onDelete)
   const handleDelete = (id) => {
     try {
       const ok = localTaskService.eliminarTarea(id);
       if (ok) {
-        // Actualizamos estado local inmediatamente
         setTareas((prev) => prev.filter((t) => String(t.id) !== String(id)));
         toast.success("🗑️ Se eliminó la tarea correctamente");
       } else {
-        toast.error("No se pudo eliminar la tarea (id no encontrado)");
+        toast.error("No se pudo eliminar la tarea");
       }
     } catch (err) {
       console.error("Error eliminando tarea:", err);
@@ -78,97 +80,88 @@ const handleCreated = (nueva) => {
     }
   };
 
-  // --- NUEVO: Manejo de alternar estado (Completada/Pendiente) con Toastify ---
-  const handleToggle = (id) => {
-    try {
-      // Asumimos que localTaskService tiene una función que alterna el estado y devuelve la tarea actualizada
-      const tareaActualizada = localTaskService.toggleCompletada(id); 
-      
-      if (tareaActualizada) {
-        // Actualizamos estado local inmediatamente usando la tarea devuelta
-        setTareas((prev) => prev.map((t) => (String(t.id) === String(id) ? tareaActualizada : t)));
-        
-        // Uso de Toastify para mensaje de confirmación
-        toast.info(
-          tareaActualizada.completada 
-            ? `🎉 Tarea "${tareaActualizada.titulo}" marcada como ¡Completada!` 
-            : `✏️ Tarea "${tareaActualizada.titulo}" marcada como pendiente.`
-        );
-      } else {
-        toast.error("No se pudo actualizar el estado de la tarea (ID no encontrado)");
-      }
-    } catch (err) {
-      console.error("Error alternando estado:", err);
-      toast.error("Error alternando el estado de la tarea");
-    }
-  };
-
-
-// 👇️ INICIO - Lógica de Edición del compañero Jhosep 🆕
-  // Esta función es llamada por TaskList/guardarEdicion, 
-  // pasando el ID y el objeto con los datos a actualizar ({ titulo, usuarioId }).
-  const handleEdit = (id, datosActualizados) => { 
+  const handleToggle = (id) => {
     try {
-      // 1. Persistir el cambio en localTaskService
-      const tareaActualizada = localTaskService.actualizarTarea(id, datosActualizados);
-
+      const tareaActualizada = localTaskService.toggleCompletada(id);
       if (tareaActualizada) {
-        // 2. Actualizar el estado de React con la nueva versión de la tarea
         setTareas((prev) =>
           prev.map((t) =>
-            String(t.id) === String(id)
-              ? tareaActualizada // Reemplaza la tarea antigua con la actualizada
-              : t
+            String(t.id) === String(id) ? tareaActualizada : t
           )
         );
-        toast.info(`📝 Tarea "${tareaActualizada.titulo}" guardada.`); // Notificación
+        toast.info(
+          tareaActualizada.completada
+            ? `🎉 Tarea "${tareaActualizada.titulo}" marcada como ¡Completada!`
+            : `✏️ Tarea "${tareaActualizada.titulo}" marcada como pendiente.`
+        );
       } else {
-        toast.error("No se pudo guardar la edición de la tarea (ID no encontrado).");
+        toast.error("No se pudo actualizar la tarea");
       }
     } catch (err) {
-      console.error("Error guardando edición:", err);
-      toast.error("Error guardando la edición de la tarea.");
+      console.error("Error alternando tarea:", err);
+      toast.error("Error alternando la tarea");
     }
   };
-  // 👆️ FIN - Lógica de Edición del compañero (REEMPLAZA STUB - Líneas 114-137) 🆕
 
+  const handleEdit = (id, datosActualizados) => {
+    try {
+      const tareaActualizada = localTaskService.actualizarTarea(
+        id,
+        datosActualizados
+      );
+      if (tareaActualizada) {
+        setTareas((prev) =>
+          prev.map((t) =>
+            String(t.id) === String(id) ? tareaActualizada : t
+          )
+        );
+        toast.info(`📝 Tarea "${tareaActualizada.titulo}" guardada.`);
+      } else {
+        toast.error("No se pudo guardar la edición.");
+      }
+    } catch (err) {
+      console.error("Error editando tarea:", err);
+      toast.error("Error editando la tarea.");
+    }
+  };
 
-  // Búsqueda reactiva (pequeño debounce)
+  // Búsqueda reactiva
   useEffect(() => {
     const timer = setTimeout(() => {
       reloadTareas(query);
     }, 250);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   return (
     <div className="max-w-3xl mx-auto p-5">
-      <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Gestor de Tareas</h1>
+        {/* 👉 Botón Logout */}
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+      </div>
 
-      {/* Formulario para crear tareas (usa localTaskService internamente) */}
       <AddTaskForm usuarios={usuarios} onCreated={handleCreated} />
-
-      {/* Buscador */}
       <SearchInput query={query} setQuery={setQuery} />
-
-      {/* Lista (tu TaskList actual) */}
       <TaskList
         query={query}
         tareas={tareas}
         usuarios={usuarios}
-        onDelete={handleDelete} // mantiene la API que tu TaskList espera
-        onToggle={handleToggle} // <-- CONECTADO: Ahora maneja el toggle con Toastify
-        onEdit={handleEdit} 
+        onDelete={handleDelete}
+        onToggle={handleToggle}
+        onEdit={handleEdit}
       />
-
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }
 
 
-// PrivateRoute dejamos igual que antes (no tocamos login ni su lógica)
 function PrivateRoute({ children, allowedRoles }) {
   const [user, setUser] = useState(null);
 
@@ -180,7 +173,7 @@ function PrivateRoute({ children, allowedRoles }) {
   }, []);
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/LoginPage" />;
   }
   if (!allowedRoles.includes(user.rol)) {
     return <Navigate to="/tasks" />;
@@ -188,9 +181,8 @@ function PrivateRoute({ children, allowedRoles }) {
   return children;
 }
 
-// Páginas (sin cambios)
 const AdminPage = () => <h2>Panel de Admin</h2>;
-const UserPage = () => <TaskListPage />; // integrando tu TaskListPage
+const UserPage = () => <TaskListPage />;
 
 function App() {
   return (
@@ -213,7 +205,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/tasks" element={<TaskListPage />} /> {/* Ruta directa opcional */}
+        <Route path="/tasks" element={<TaskListPage />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
