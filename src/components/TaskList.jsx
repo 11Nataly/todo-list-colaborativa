@@ -1,52 +1,67 @@
-import React, { useState } from "react";
-import TaskCard from "./TaskCard.jsx"; // Usamos el TaskCard con motion.li
+import React, { useState, useEffect } from "react";
+import TaskCard from "./TaskCard.jsx";
 
-// Añadimos 'onToggle' a los props para alternar el estado
-const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
+const TaskList = ({
+  query = "",
+  tareas = [],
+  usuarios = [],
+  onDelete,
+  onEdit,
+  onToggle,
+}) => {
   const [editandoId, setEditandoId] = useState(null);
   const [editTitulo, setEditTitulo] = useState("");
   const [editUsuario, setEditUsuario] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
 
+  const tareasPorPagina = 5;
+
+  // Filtrar tareas
   const tareasFiltradas = tareas.filter(
     (t) =>
-      t.titulo.toLowerCase().includes(query.toLowerCase()) ||
+      t.titulo?.toLowerCase().includes(query.toLowerCase()) ||
       (t.editadoPor &&
         t.editadoPor.toLowerCase().includes(query.toLowerCase()))
   );
+
+  // Total de páginas
+  const totalPaginas = Math.ceil(tareasFiltradas.length / tareasPorPagina);
+
+  // Cortar tareas para la página actual
+  const inicio = (paginaActual - 1) * tareasPorPagina;
+  const tareasMostradas = tareasFiltradas.slice(inicio, inicio + tareasPorPagina);
+
+  // Resetear a la página 1 cuando cambie la búsqueda
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [query]);
 
   const getUsuarioNombre = (id) => {
     const user = usuarios.find((u) => u.id === id);
     return user ? user.nombre : "Desconocido";
   };
-  
-  // Esta función se pasa a TaskCard como prop 'onEdit' para iniciar el modo edición.
+
   const startEditMode = (tarea) => {
     setEditandoId(tarea.id);
-    setEditTitulo(tarea.titulo);
-    // Aseguramos que editUsuario sea el ID o una cadena vacía si no está asignado.
-    setEditUsuario(tarea.usuarioId || "");
+    setEditTitulo(tarea.titulo || "");
+    setEditUsuario(tarea.usuarioId ? String(tarea.usuarioId) : "");
   };
 
-  // Función de edición (Lógica original de tu compañero) que llama al onEdit del padre para GUARDAR
   const guardarEdicion = (id) => {
     if (editTitulo.trim() === "") return;
-    // onEdit del padre maneja la actualización del estado y la persistencia
     onEdit(id, {
       titulo: editTitulo,
       usuarioId: editUsuario ? Number(editUsuario) : null,
-      // La fechaEdicion se gestionará en App.jsx/localTaskService
     });
     setEditandoId(null);
   };
 
   return (
-    // Ya no usamos <ul>, ya que TaskCard usa <motion.li>
     <div className="space-y-4">
-      {tareasFiltradas.length > 0 ? (
-        tareasFiltradas.map((tarea) => (
+      {tareasMostradas.length > 0 ? (
+        tareasMostradas.map((tarea) => (
           <React.Fragment key={tarea.id}>
             {editandoId === tarea.id ? (
-              // --- Modo Edición (Inputs y botones) ---
               <div
                 key={`edit-${tarea.id}`}
                 className="p-4 bg-gray-50 rounded-lg shadow-inner border-l-4 border-yellow-500"
@@ -55,14 +70,14 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
                   type="text"
                   value={editTitulo}
                   onChange={(e) => setEditTitulo(e.target.value)}
-                  className="w-full border border-gray-300 p-2 rounded mb-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  className="w-full border border-gray-300 p-2 rounded mb-2"
                   placeholder="Editar título"
+                  autoFocus
                 />
-
                 <select
                   value={editUsuario}
                   onChange={(e) => setEditUsuario(e.target.value)}
-                  className="w-full border border-gray-300 p-2 rounded mb-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  className="w-full border border-gray-300 p-2 rounded mb-2"
                 >
                   <option value="">-- Seleccionar usuario --</option>
                   {usuarios.map((u) => (
@@ -71,30 +86,28 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
                     </option>
                   ))}
                 </select>
-
                 <div className="mt-3 flex gap-2">
                   <button
                     onClick={() => guardarEdicion(tarea.id)}
-                    className="flex-1 px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition font-medium shadow-md"
+                    className="flex-1 px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
                   >
                     Guardar Cambios
                   </button>
                   <button
                     onClick={() => setEditandoId(null)}
-                    className="flex-1 px-4 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition font-medium shadow-md"
+                    className="flex-1 px-4 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
                   >
                     Cancelar
                   </button>
                 </div>
               </div>
             ) : (
-              // --- Modo Visualización (Usando TaskCard) ---
               <TaskCard
                 tarea={tarea}
-                usuario={getUsuarioNombre(tarea.usuarioId)} // TaskCard espera 'usuario'
+                usuario={getUsuarioNombre(tarea.usuarioId)}
                 onDelete={onDelete}
-                onToggle={onToggle} 
-                onEdit={startEditMode} // onEdit de TaskCard ahora inicia el modo de edición
+                onToggle={onToggle}
+                onEdit={startEditMode}
               />
             )}
           </React.Fragment>
@@ -102,6 +115,31 @@ const TaskList = ({ query, tareas, usuarios, onDelete, onEdit, onToggle }) => {
       ) : (
         <div className="text-center text-gray-500 py-4">
           No hay tareas disponibles
+        </div>
+      )}
+
+      {/* Botones de paginación */}
+      {totalPaginas > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <button
+            onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+            disabled={paginaActual === 1}
+            className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <span>
+            Página {paginaActual} de {totalPaginas}
+          </span>
+          <button
+            onClick={() =>
+              setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
+            }
+            disabled={paginaActual === totalPaginas}
+            className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Siguiente
+          </button>
         </div>
       )}
     </div>

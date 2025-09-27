@@ -56,11 +56,10 @@ function TaskListPage() {
   }, []);
 
   // Manejo de creación (AddTaskForm llamará onCreated)
-  const handleCreated = (nueva) => {
-    // Nueva ya fue guardada en localTaskService por AddTaskForm; recargamos la lista
-    reloadTareas(query);
-    toast.success("✅ Tarea creada");
-  };
+const handleCreated = (nueva) => {
+  setTareas((prev) => [...prev, nueva]); // 👉 añade la nueva tarea al estado
+  toast.success("✅ Tarea creada");
+};
 
   // Manejo de eliminar (llamado por TaskList -> TaskCard via onDelete)
   const handleDelete = (id) => {
