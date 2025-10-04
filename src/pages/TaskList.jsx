@@ -37,6 +37,7 @@ const TaskList = ({ query = "", tareas = [], usuarios = [], onDelete, onEdit, on
 
   return (
     <div className="space-y-4">
+      {/* 👉 Botón Logout */}
       <LogoutButton onLogout={onLogout} />
 
       {tareasMostradas.length > 0 ? (
@@ -60,7 +61,9 @@ const TaskList = ({ query = "", tareas = [], usuarios = [], onDelete, onEdit, on
           )
         )
       ) : (
-        <div className="text-center text-gray-500 py-4">No hay tareas disponibles</div>
+        <div className="text-center text-gray-500 py-4">
+          No hay tareas disponibles
+        </div>
       )}
 
       <Pagination
