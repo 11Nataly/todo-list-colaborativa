@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useEffect, useState } from "react";
-import TaskList from "./components/TaskList.jsx";
+import TaskList from "./pages/TaskList.jsx";
 import SearchInput from "./components/SearchInput.jsx";
 import TaskModal from "./components/TaskModal.jsx";
 import localTaskService from "./utils/localTaskService";
@@ -13,6 +13,8 @@ function App() {
   const [usuarios, setUsuarios] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
+  // Cargar/recargar tareas desde localTaskService
   const reloadTareas = (q = "") => {
     try {
       const res = localTaskService.getTareas({ q });
@@ -44,11 +46,25 @@ function App() {
     reloadTareas();
   }, []);
 
-  const handleCreated = () => {
+  //--------------
+  //MANEJOS
+  //--------------
+  // Manejo de creación (llamado por TaskModal)
+  const handleCreated = (nueva) => {
+    // Cierra el modal
+    setIsModalOpen(false);
+    // Recarga la lista (podrías optimizar agregando directamente la nueva tarea al estado)
     reloadTareas(query);
-    toast.success("✅ Tarea creada");
+  }
+
+    // 👉 Logout
+  const handleLogout = () => {
+    localStorage.removeItem("user"); // borra la sesión
+    window.location.href = "/login"; // redirige al login
   };
 
+
+// Manejo de eliminar (llamado por TaskList -> TaskCard via onDelete)
   const handleDelete = (id) => {
     try {
       const ok = localTaskService.eliminarTarea(id);
@@ -56,7 +72,7 @@ function App() {
         setTareas((prev) => prev.filter((t) => String(t.id) !== String(id)));
         toast.success("🗑️ Se eliminó la tarea correctamente");
       } else {
-        toast.error("No se pudo eliminar la tarea (id no encontrado)");
+        toast.error("No se pudo eliminar la tarea");
       }
     } catch (err) {
       console.error("Error eliminando tarea:", err);
@@ -79,11 +95,11 @@ function App() {
             : `✏️ Tarea "${tareaActualizada.titulo}" marcada como pendiente.`
         );
       } else {
-        toast.error("No se pudo actualizar el estado de la tarea");
+        toast.error("No se pudo actualizar la tarea");
       }
     } catch (err) {
-      console.error("Error alternando estado:", err);
-      toast.error("Error alternando el estado de la tarea");
+      console.error("Error alternando tarea:", err);
+      toast.error("Error alternando la tarea");
     }
   };
 
@@ -113,11 +129,14 @@ function App() {
         toast.error("No se pudo guardar la edición de la tarea");
       }
     } catch (err) {
-      console.error("Error guardando edición:", err);
-      toast.error("Error guardando la edición de la tarea.");
+      console.error("Error editando tarea:", err);
+      toast.error("Error editando la tarea.");
     }
   };
 
+  // 👆️ FIN - Lógica de Edición del compañero (REEMPLAZA STUB - Líneas 114-137) 🆕
+
+  // Búsqueda reactiva
   useEffect(() => {
     const timer = setTimeout(() => {
       reloadTareas(query);
@@ -129,6 +148,9 @@ function App() {
     <div className="max-w-3xl mx-auto p-5">
       <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
 
+      {/* Formulario para crear tareas (usa localTaskService internamente) */}
+
+      {/* 💡 EL BOTÓN QUE ABRE EL MODAL */}
       <div className="mb-6 flex justify-end">
         <button
           onClick={() => setIsModalOpen(true)}
@@ -138,24 +160,28 @@ function App() {
         </button>
       </div>
 
+      {/* Buscador */}
       <SearchInput query={query} setQuery={setQuery} />
 
+      {/* Lista (tu TaskList actual) */}
       <TaskList
         query={query}
         tareas={tareas}
         usuarios={usuarios}
-        onDelete={handleDelete}
-        onToggle={handleToggle}
-        onEdit={handleEdit}
+        onDelete={handleDelete} // mantiene la API que tu TaskList espera
+        onToggle={handleToggle} // <-- CONECTADO: Ahora maneja el toggle con Toastify
+        onEdit={handleEdit} 
+        onLogout={handleLogout}  // <-- CONECTADO: Ahora maneja el logout
       />
 
       <ToastContainer position="top-right" autoClose={2000} />
-
-      <TaskModal
+    {/* 💡 EL COMPONENTE MODAL */}
+      <TaskModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onTaskCreated={handleCreated}
       />
+
     </div>
   );
 }
