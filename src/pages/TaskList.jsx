@@ -1,3 +1,4 @@
+// src/pages/TaskList.jsx
 import React, { useState, useEffect } from "react";
 import TaskCard from "../components/TaskCard.jsx";
 import LogoutButton from "../components/LogoutButton.jsx";
@@ -28,10 +29,34 @@ const TaskList = ({ query = "", tareas = [], usuarios = [], onDelete, onEdit, on
     return user ? user.nombre : "Desconocido";
   };
 
+  // Función para obtener el nombre del usuario logueado desde localStorage
+  const getLoggedUserName = () => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        return user.nombre || user.username || "Usuario"; // Diferentes posibles campos de nombre
+      }
+      return null;
+    } catch (error) {
+      console.error("Error obteniendo usuario del localStorage:", error);
+      return null;
+    }
+  };
+
   const guardarEdicion = (id, nuevoTitulo) => {
-    const editorId = getLoggedUserId();
-    if (!editorId) return;
-    onEdit(id, { titulo: nuevoTitulo, editorId });
+    const editorNombre = getLoggedUserName();
+    
+    if (!editorNombre) {
+      console.error("No se pudo obtener el usuario logueado");
+      return;
+    }
+    
+    // Solo pasamos el nombre del editor, no el ID
+    onEdit(id, { 
+      titulo: nuevoTitulo, 
+      editorNombre: editorNombre
+    });
     setEditandoId(null);
   };
 

@@ -102,40 +102,36 @@ function App() {
       toast.error("Error alternando la tarea");
     }
   };
+const handleEdit = (id, datosActualizados) => {
+  if (!datosActualizados.editorNombre) {
+    toast.error("No se pudo guardar la edición: Autor no identificado.");
+    return;
+  }
 
-  const handleEdit = (id, datosActualizados) => {
-    if (!datosActualizados.editorId) {
-      toast.error("No se pudo guardar la edición: Autor no identificado.");
-      return;
+  try {
+    const datosFinales = {
+      titulo: datosActualizados.titulo,
+      fechaEdicion: new Date().toISOString(),
+      editadoPor: datosActualizados.editorNombre 
+    };
+
+    const tareaActualizada = localTaskService.actualizarTarea(id, datosFinales);
+
+    if (tareaActualizada) {
+      setTareas((prev) =>
+        prev.map((t) =>
+          String(t.id) === String(id) ? tareaActualizada : t
+        )
+      );
+      toast.info(`📝 Tarea "${tareaActualizada.titulo}" guardada.`);
+    } else {
+      toast.error("No se pudo guardar la edición de la tarea");
     }
-
-    try {
-      const datosFinales = {
-        titulo: datosActualizados.titulo,
-        fechaEdicion: new Date().toISOString(),
-        ultimaEdicionPorId: datosActualizados.editorId,
-      };
-
-      const tareaActualizada = localTaskService.actualizarTarea(id, datosFinales);
-
-      if (tareaActualizada) {
-        setTareas((prev) =>
-          prev.map((t) =>
-            String(t.id) === String(id) ? tareaActualizada : t
-          )
-        );
-        toast.info(`📝 Tarea "${tareaActualizada.titulo}" guardada.`);
-      } else {
-        toast.error("No se pudo guardar la edición de la tarea");
-      }
-    } catch (err) {
-      console.error("Error editando tarea:", err);
-      toast.error("Error editando la tarea.");
-    }
-  };
-
-  // 👆️ FIN - Lógica de Edición del compañero (REEMPLAZA STUB - Líneas 114-137) 🆕
-
+  } catch (err) {
+    console.error("Error editando tarea:", err);
+    toast.error("Error editando la tarea.");
+  }
+};
   // Búsqueda reactiva
   useEffect(() => {
     const timer = setTimeout(() => {

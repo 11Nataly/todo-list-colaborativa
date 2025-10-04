@@ -46,8 +46,14 @@ export default function TaskCard({ tarea, usuario, onToggle, onEdit, onDelete })
             Autor: <span className="font-medium text-gray-700">{usuario || "Desconocido"}</span>
             <br />
             Creada: {tarea.fechaCreacion ? new Date(tarea.fechaCreacion).toLocaleString() : "Sin fecha"}
-            {" • "}
-            Editada: {tarea.fechaEdicion ? new Date(tarea.fechaEdicion).toLocaleString() : "Sin edición"}
+            {/* Mostrar información de edición si existe */}
+            {tarea.fechaEdicion && (
+              <>
+                <br />
+                Editada: {new Date(tarea.fechaEdicion).toLocaleString()}
+                {tarea.editadoPor && ` por ${tarea.editadoPor}`}
+              </>
+            )}
           </p>
         </div>
 

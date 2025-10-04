@@ -1,4 +1,4 @@
-
+//src/utils/localTaskService.js
 import * as baseService from "./taskService"; // servicio del compañero (lee db.json)
 
 const STORAGE_KEY = "local_wrapper_task_db_v1";
@@ -186,9 +186,9 @@ export function crearTarea({ titulo, descripcion = "", usuarioId }) {
 }
 
 /**
- * actualizarTarea(id, patch, editorId) -> tarea actualizada | null
+ * actualizarTarea(id, patch) -> tarea actualizada | null
  */
-export function actualizarTarea(id, patch = {}, editorId = null) {
+export function actualizarTarea(id, patch = {}) {  // Elimina el parámetro editorId
   initFromBaseIfMissing();
   const db = loadRaw();
   const idx = db.tareas.findIndex((t) => String(t.id) === String(id));
@@ -197,8 +197,8 @@ export function actualizarTarea(id, patch = {}, editorId = null) {
   const actualizado = {
     ...existente,
     ...patch,
-    fechaEdicion: nowISO(),
-    editadoPor: editorId !== null && typeof editorId !== "undefined" ? Number(editorId) : existente.editadoPor,
+    // fechaEdicion ya viene en el patch desde App.jsx
+    // editadoPor ya viene en el patch desde App.jsx
   };
   db.tareas[idx] = actualizado;
   saveRaw(db);
